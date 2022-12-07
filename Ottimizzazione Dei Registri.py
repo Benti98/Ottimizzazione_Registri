@@ -52,6 +52,7 @@ for i in range(0, int(len(VAL))):
     plt.plot(c, DFG['CLK'].iloc[i], "bo")
     c += 1
 
+print("CIAO")
     
 
 plt.plot(x, y[:20])
