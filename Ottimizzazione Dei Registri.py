@@ -16,57 +16,40 @@ di utilizzare un euristico di tipo greedy. Si tratta semplicemente di definire u
 Si parte dal primo vertice e si procede assegnando a ciascun vertice un colore fra quelli diversi da quelli dei vertici adiacenti
 a quello considerato. Dopo aver fatto questa operazione, si chiede di scrivere la tabella con la descrizione RTL delle operazioni.
 '''
+#Creo funzione che apra un file
+def file_to_DFG(file):
+    file = open(file, "r+")
+    DFG = pd.read_csv(file, names = ['Val', 'Oper', 'CLK'], engine = 'python', delimiter=";")
+    return DFG
 
-file = open("DFG1.txt", "r+")
+def dict_for_lyfe_cycle(dict):
+    for i in range(len(DFG)):
+        if DFG['Val'][i] not in dict:
+            dict[DFG['Val'][i]] = DFG['CLK'][i]
+        else:
+            dict[DFG['Val'][i]] = DFG['CLK'][i] - dict[DFG['Val'][i]]
+    return dict
 
-DFG = pd.read_csv(file, names = ['Val', 'Oper', 'CLK'], engine = 'python', delimiter=";")
+def register(dict):
+    #Determino il numero di registri che si utilizzano
+    num_clock = max(list(dict.values()))
+    life_cycle = []
+    for i in range(int(num_clock)):
+        life_cycle.append([])
 
-#Definisco quanti cicli di clk ci sono nel DFG
-CLK = DFG['CLK'].values
-CLK_number = []
-for element in CLK:
-    if element not in CLK_number:
-        CLK_number.append(element)
-print("Nel DFG ci sono", CLK_number[-1], "cicli di clock")
-number_CLK = []
-for i in range(1, int(CLK_number[-1]) + 1):
-    number_CLK.append(i)
-    
-CLK_plot = np.array(number_CLK)
-x = np.arange(0,20) 
-y = []
-for element in CLK_plot:
-    for v in range (0, 20):
-        y.append(element)
+    for node in range(0, len(dict.keys())):
+        if len(list(dict.values())[node]) == 1:
+            cycle = int(list(dict.values())[node])
+            life_cycle[cycle - 1].append(list(dict.keys())[node])
+        elif len(list(dict.values())[node]) > 1:
+            for element in list(dict.values())[node]:
+                if element != ',':
+                    cycle = int(element)
+                    life_cycle[cycle - 1].append(list(dict.keys())[node])
+    return life_cycle
 
-#Definisco quante operazioni ci sono nel DFG
-VAL = DFG['Val'].values
-
-
-print(DFG['CLK'].values)
-for i in range(0, int(len(VAL))):
-    print("Loperazione", DFG['Val'].iloc[i],":", DFG['Oper'].iloc[i], "si mantiene nel/i ciclo/i", DFG['CLK'].iloc[i])
-
-c = 0
-for i in range(0, int(len(VAL))):
-    plt.plot(c, DFG['CLK'].iloc[i], "bo")
-    c += 1
-
-print("CIAO")
-    
-
-plt.plot(x, y[:20])
-plt.plot(x, y[20:40])
-plt.plot(x, y[40:60])
-plt.plot(x, y[60:80])
-plt.plot(x, y[80:100])
-plt.ylabel("CLOCK")
-plt.show()
-
-
-
-
-
-
-
-
+DFG = file_to_DFG("DFG1.txt") #Creo DFG dato un file di testo
+dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
+life_cycle = register(dizionario) #Creo lista con i cicli di clock e le variabili attive in quel ciclo
+for element in range(len(life_cycle)):
+    print("Ciclo di clock: ", element + 1, "Variabili attive: ", life_cycle[element])
