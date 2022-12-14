@@ -2,6 +2,7 @@
 
 import numpy as np
 import pandas as pd
+import networkx as nx
 import matplotlib.pyplot as plt
 
 '''
@@ -22,7 +23,8 @@ def file_to_DFG(file):
     DFG = pd.read_csv(file, names = ['Val', 'Oper', 'CLK'], engine = 'python', delimiter=";")
     return DFG
 
-def dict_for_lyfe_cycle(dict):
+def dict_for_lyfe_cycle(DFG):
+    dict = {}
     for i in range(len(DFG)):
         if DFG['Val'][i] not in dict:
             dict[DFG['Val'][i]] = DFG['CLK'][i]
@@ -48,8 +50,124 @@ def register(dict):
                     life_cycle[cycle - 1].append(list(dict.keys())[node])
     return life_cycle
 
+def Number_of_register(life_cycle):
+    #Determino il numero di registri che si utilizzano 
+    num_register = 0
+    comparison = 0
+    for clock in life_cycle:
+        for operation in clock:
+            if operation != ',':
+                comparison += 1
+        if num_register <= comparison:
+            num_register = comparison
+            comparison = 0
+        else:
+            comparison = 0    
+    return num_register     
+                
+
+def Incompatibility_Graph(life_cycle):
+    fig, axs = plt.subplots(1, len(life_cycle))
+    fig.suptitle('Grafo di incompatibilità')
+    for i, clock in enumerate(life_cycle):
+        G = nx.Graph()
+        for operation in clock:
+            if operation != ',':
+                G.add_node(operation, size = 2)
+        for operation in clock:
+            if operation != ',':
+                for operation2 in clock:
+                    if operation2 != ',':
+                        if operation != operation2:
+                            G.add_edge(operation, operation2)
+        nx.draw(G, with_labels = True, ax = axs[i])    
+    return G, plt
+
+def dict_incompatibility(life_cycle):
+    dict = {}
+    for i, clock in enumerate(life_cycle):
+        for operation in clock:
+            if operation != ',':
+                if operation not in dict:
+                    dict[operation] = []
+                for operation2 in clock:
+                    if operation2 != ',':
+                        if operation2 not in dict[operation]:
+                            if operation != operation2:
+                                dict[operation].append(operation2)
+    return dict
+
+
+def compatible(register, dict, operation):
+    x = 0
+    for element in register:
+        if element == operation:
+            continue
+        elif operation in list(dict[element]):
+            x = 0
+            break
+        else:
+            x = 1
+    if x == 1:
+        return True
+    else:  
+        return False
+
+def register_optimization(life_cycle, dict, num_register):
+    
+    register_optimized = []
+    operation_used = []
+    for i in range(0, num_register):
+        register_optimized.append([])
+        
+    for clock in life_cycle:
+        for operation in clock:
+            for register in register_optimized:
+                if operation not in operation_used:
+                    if register == []:
+                        register.append(operation)
+                        operation_used.append(operation)
+                        break
+                    elif operation in register:
+                        break
+                    else:
+                        add = compatible(register, dict, operation)
+                        if add == True:
+                            register.append(operation)
+                            operation_used.append(operation)
+                        else: 
+                            continue    
+                else: 
+                    continue
+                    
+    return register_optimized
+
+'''
+def coloring_graph(graph,register):
+    colors = nx.equitable_color(graph, num_colors = register)
+    print(colors)
+    nx.draw(graph, with_labels = True)    
+    return plt.show()
+'''
+
 DFG = file_to_DFG("DFG1.txt") #Creo DFG dato un file di testo
 dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
 life_cycle = register(dizionario) #Creo lista con i cicli di clock e le variabili attive in quel ciclo
+register = Number_of_register(life_cycle) #Determino il numero di registri che si utilizzano
 for element in range(len(life_cycle)):
     print("Ciclo di clock: ", element + 1, "Variabili attive: ", life_cycle[element])
+
+print("Il numero di registri necessari per il Graph Coloring è: ", register)
+
+graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibilità
+#figure.show()
+
+incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili e le rispettive incompatibilità
+print(incomp_dict)
+
+fine = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri
+
+print("I registri ottimizzati sono: ", fine)
+
+
+#optimezed_register = coloring_graph(graph, register) #Coloro il grafo di incompatibilità
