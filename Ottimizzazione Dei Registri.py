@@ -141,6 +141,59 @@ def register_optimization(life_cycle, dict, num_register):
                     continue                    
     return register_optimized
 
+def register_optimization(life_cycle, dict, num_register):
+    register_optimized = []
+    operation_used = []
+    for i in range(0, num_register):
+        register_optimized.append([])   
+    for clock in life_cycle:
+        for operation in clock:
+            for register in register_optimized:
+                if operation not in operation_used:
+                    if register == []:
+                        register.append(operation)
+                        operation_used.append(operation)
+                        break
+                    elif operation in register:
+                        break
+                    else:
+                        add = compatible(register, dict, operation)
+                        if add == True:
+                            register.append(operation)
+                            operation_used.append(operation)
+                        else: 
+                            continue    
+                else: 
+                    continue                    
+    return register_optimized
+
+def register_optimization_2(life_cycle, dict, num_register, max_operation):
+    register_optimized = []
+    operation_used = []
+    for i in range(0, num_register):
+        register_optimized.append([])   
+    for clock in life_cycle:
+        for operation in clock:
+            for register in register_optimized:
+                if len(register) < int(max_operation):
+                    if operation not in operation_used:
+                        if register == []:
+                            register.append(operation)
+                            operation_used.append(operation)
+                            break
+                        elif operation in register:
+                            break
+                        else:
+                            add = compatible(register, dict, operation)
+                            if add == True:
+                                register.append(operation)
+                                operation_used.append(operation)
+                            else: 
+                                continue    
+                    else: 
+                        continue                 
+    return register_optimized
+
 def coloring_graph(graph, registri, life_cycle):
     color = list(np.random.choice(range(256), size = len(registri)))
     #color = int(["#"+''.join([np.random.choice('0123456789ABCDEF') for j in range(6)])])
@@ -171,7 +224,20 @@ def coloring_graph(graph, registri, life_cycle):
         nx.set_node_attributes(G, dict_color, 'color')
         nx.draw(G, with_labels = True, ax = axs[i], node_color = [color for _, color in nx.get_node_attributes(G, 'color').items()])
     print("La corrispondenza nodi-colore è: ", dict_color)
-    return plt.show()
+    return plt.show(), color
+
+def RTL_Description(registri, color, life_cycle, DFG):
+    dict = {}
+    nome_registro = []
+    for i in range(0,len(registri)):
+        nome_registro.append("R" + str(i))
+
+    dict["Colore"] = list(color)
+    dict["Registro"] = nome_registro
+    dict["Variabili attive"] = registri
+    
+    rtl_1 = pd.DataFrame(dict)
+    print(rtl_1)
 
 
 DFG = file_to_DFG("DFG1.txt") #Creo DFG dato un file di testo
@@ -187,11 +253,14 @@ graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibil
 #figure.show()
 
 incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili e le rispettive incompatibilità
-registri = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri
+print("Quante operazioni vuoi al massimo per ogni registro sapendo che all'interno ci sono ", register, "registri")
+max_operation = input(" ")
+registri = register_optimization_2(life_cycle, incomp_dict, register, max_operation) #Ottimizzo il numero di registri
 
 for i in range(0,len(registri)):
     print("Il", (i + 1), "registro contiene le seguenti operazioni --> ", registri[i])
 
 
-fine = coloring_graph(figure, registri, life_cycle)
+final_graph, color = coloring_graph(figure, registri, life_cycle)
+rtl = RTL_Description(registri, color,life_cycle, DFG)
 #optimezed_register = coloring_graph(graph, register) #Coloro il grafo di incompatibilità
