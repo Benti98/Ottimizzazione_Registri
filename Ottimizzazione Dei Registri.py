@@ -143,6 +143,7 @@ def register_optimization(life_cycle, dict, num_register):
 
 def coloring_graph(graph, registri, life_cycle):
     color = list(np.random.choice(range(256), size = len(registri)))
+    #color = int(["#"+''.join([np.random.choice('0123456789ABCDEF') for j in range(6)])])
     dict_color = {}
 
     #Assegno ad ogni nodo il proprio colore 
@@ -160,15 +161,16 @@ def coloring_graph(graph, registri, life_cycle):
         G = nx.Graph()
         for operation in clock:
             if operation != ',':
-                G.add_node(operation, size = 2, node_color = 'r')
+                G.add_node(operation, size = 2)
         for operation in clock:
             if operation != ',':
                 for operation2 in clock:
                     if operation2 != ',':
                         if operation != operation2:
                             G.add_edge(operation, operation2)
-        nx.draw(G, with_labels = True, ax = axs[i], node_color = 'r')
-
+        nx.set_node_attributes(G, dict_color, 'color')
+        nx.draw(G, with_labels = True, ax = axs[i], node_color = [color for _, color in nx.get_node_attributes(G, 'color').items()])
+    print("La corrispondenza nodi-colore è: ", dict_color)
     return plt.show()
 
 
