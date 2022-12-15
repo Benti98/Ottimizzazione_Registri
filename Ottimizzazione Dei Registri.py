@@ -83,6 +83,7 @@ def Incompatibility_Graph(life_cycle):
         nx.draw(G, with_labels = True, ax = axs[i])    
     return G, plt
 
+#Crea la directori a cui associa ad ogni operazione (chiave) le operazioni incompatibili (valore)
 def dict_incompatibility(life_cycle):
     dict = {}
     for i, clock in enumerate(life_cycle):
@@ -97,7 +98,7 @@ def dict_incompatibility(life_cycle):
                                 dict[operation].append(operation2)
     return dict
 
-
+#Determina se un'operazione è compatibile con un registro (quali nodi vanno dello stesso colore)
 def compatible(register, dict, operation):
     x = 0
     for element in register:
@@ -113,13 +114,12 @@ def compatible(register, dict, operation):
     else:  
         return False
 
+#Creazione dei registri
 def register_optimization(life_cycle, dict, num_register):
-    
     register_optimized = []
     operation_used = []
     for i in range(0, num_register):
-        register_optimized.append([])
-        
+        register_optimized.append([])   
     for clock in life_cycle:
         for operation in clock:
             for register in register_optimized:
@@ -138,17 +138,39 @@ def register_optimization(life_cycle, dict, num_register):
                         else: 
                             continue    
                 else: 
-                    continue
-                    
+                    continue                    
     return register_optimized
 
-'''
-def coloring_graph(graph,register):
-    colors = nx.equitable_color(graph, num_colors = register)
-    print(colors)
-    nx.draw(graph, with_labels = True)    
+def coloring_graph(graph, registri, life_cycle):
+    color = list(np.random.choice(range(256), size = len(registri)))
+    dict_color = {}
+
+    #Assegno ad ogni nodo il proprio colore 
+    for clock in life_cycle:
+        for element in clock:
+            j=0
+            for registro in registri:
+                if element in registro:
+                    dict_color[element] = color[j]
+                else: 
+                    j+=1
+    fig, axs = plt.subplots(1, len(life_cycle))
+    fig.suptitle('COLORING GRAPH')
+    for i, clock in enumerate(life_cycle):
+        G = nx.Graph()
+        for operation in clock:
+            if operation != ',':
+                G.add_node(operation, size = 2, node_color = 'r')
+        for operation in clock:
+            if operation != ',':
+                for operation2 in clock:
+                    if operation2 != ',':
+                        if operation != operation2:
+                            G.add_edge(operation, operation2)
+        nx.draw(G, with_labels = True, ax = axs[i], node_color = 'r')
+
     return plt.show()
-'''
+
 
 DFG = file_to_DFG("DFG1.txt") #Creo DFG dato un file di testo
 dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
@@ -163,11 +185,11 @@ graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibil
 #figure.show()
 
 incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili e le rispettive incompatibilità
-print(incomp_dict)
+registri = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri
 
-fine = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri
+for i in range(0,len(registri)):
+    print("Il", (i + 1), "registro contiene le seguenti operazioni --> ", registri[i])
 
-print("I registri ottimizzati sono: ", fine)
 
-
+fine = coloring_graph(figure, registri, life_cycle)
 #optimezed_register = coloring_graph(graph, register) #Coloro il grafo di incompatibilità
