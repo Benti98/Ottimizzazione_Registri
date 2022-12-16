@@ -228,19 +228,52 @@ def coloring_graph(graph, registri, life_cycle):
 
 def RTL_Description(registri, color, life_cycle, DFG):
     dict = {}
+    dict2 = {}
+    dict_operation = {}
+
     nome_registro = []
+
+
+    for i in range(len(DFG)):
+        if DFG['Val'][i] not in dict_operation:
+            dict_operation[DFG['Val'][i]] = DFG['Oper'][i]
+        else:
+            dict_operation[DFG['Val'][i]] = DFG['Oper'][i] - dict_operation[DFG['Oper'][i]]
+
     for i in range(0,len(registri)):
         nome_registro.append("R" + str(i))
 
     dict["Colore"] = list(color)
     dict["Registro"] = nome_registro
     dict["Variabili attive"] = registri
+
+
+    operazioni = []
+    for i in range(0,len(life_cycle)):
+        operazioni.append([])
+
+    #print(dict_operation)
+    i = 0
+    for clock in life_cycle:
+        j = 0
+        for element in clock:
+            operazioni[i].append(dict_operation[element])
+            j+=1
+        i+=1
     
+    
+
+    dict2["Clock"] = list(range(1,6))
+    dict2["Operazioni"] = operazioni 
+
+    #print(dict2)
+
     rtl_1 = pd.DataFrame(dict)
-    print(rtl_1)
+    rtl_2 = pd.DataFrame(dict2)
+    print(rtl_1, "\n", rtl_2)
 
 
-DFG = file_to_DFG("DFG1.txt") #Creo DFG dato un file di testo
+DFG = file_to_DFG("DFG2.txt") #Creo DFG dato un file di testo
 dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
 life_cycle = register(dizionario) #Creo lista con i cicli di clock e le variabili attive in quel ciclo
 register = Number_of_register(life_cycle) #Determino il numero di registri che si utilizzano
@@ -253,9 +286,9 @@ graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibil
 #figure.show()
 
 incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili e le rispettive incompatibilità
-print("Quante operazioni vuoi al massimo per ogni registro sapendo che all'interno ci sono ", register, "registri")
-max_operation = input(" ")
-registri = register_optimization_2(life_cycle, incomp_dict, register, max_operation) #Ottimizzo il numero di registri
+#print("Quante operazioni vuoi al massimo per ogni registro sapendo che all'interno ci sono ", register, "registri")
+#max_operation = input(" ")
+registri = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri, se voglio decidere quante operazioni mettere nel registro, inserire la variabile di input
 
 for i in range(0,len(registri)):
     print("Il", (i + 1), "registro contiene le seguenti operazioni --> ", registri[i])
