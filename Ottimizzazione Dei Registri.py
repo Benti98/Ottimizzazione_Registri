@@ -81,6 +81,7 @@ def Incompatibility_Graph(life_cycle):
                         if operation != operation2:
                             G.add_edge(operation, operation2)
         nx.draw(G, with_labels = True, ax = axs[i])    
+    
     return G, plt
 
 #Crea la directori a cui associa ad ogni operazione (chiave) le operazioni incompatibili (valore)
@@ -263,17 +264,20 @@ def RTL_Description(registri, color, life_cycle, DFG):
     
     
 
-    dict2["Clock"] = list(range(1,6))
+    dict2["Clock"] = list(range(1,int(max(DFG["CLK"]))+1))
     dict2["Operazioni"] = operazioni 
 
     #print(dict2)
 
     rtl_1 = pd.DataFrame(dict)
     rtl_2 = pd.DataFrame(dict2)
+    print("-------------------------------------")
+    print("           RTL DESCRIPTION           ")
+    print("-------------------------------------")
     print(rtl_1, "\n", rtl_2)
 
 
-DFG = file_to_DFG("DFG2.txt") #Creo DFG dato un file di testo
+DFG = file_to_DFG("DFG5.txt") #Creo DFG dato un file di testo
 dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
 life_cycle = register(dizionario) #Creo lista con i cicli di clock e le variabili attive in quel ciclo
 register = Number_of_register(life_cycle) #Determino il numero di registri che si utilizzano
@@ -283,7 +287,7 @@ for element in range(len(life_cycle)):
 print("Il numero di registri necessari per il Graph Coloring è: ", register)
 
 graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibilità
-#figure.show()
+figure.show()
 
 incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili e le rispettive incompatibilità
 #print("Quante operazioni vuoi al massimo per ogni registro sapendo che all'interno ci sono ", register, "registri")
