@@ -43,20 +43,22 @@ def dict_for_lyfe_cycle(DFG):
     dict = {}
     for i in range(len(DFG)):
         if DFG['Val'][i] not in dict:
-            dict[DFG['Val'][i]] = DFG['CLK'][i]
+            dict[DFG['Val'][i]] = str(DFG['CLK'][i])
         else:
             dict[DFG['Val'][i]] = DFG['CLK'][i] - dict[DFG['Val'][i]]
     return dict
 
+#CORREGGERE ERRORE IN CREAZIONE LISTA QUANDO HO UN CICLO DI CLOCK PER OGNI OPERAZIONE
 def register(dict):
     #Determino il numero di registri che si utilizzano
     num_clock = max(list(dict.values()))
     life_cycle = []
     for i in range(int(num_clock)):
         life_cycle.append([])
-
+    
     for node in range(0, len(dict.keys())):
-        if len(list(dict.values())[node]) == 1:
+        lista = list(dict.values())
+        if len(lista[node]) < 2:
             cycle = int(list(dict.values())[node])
             life_cycle[cycle - 1].append(list(dict.keys())[node])
         elif len(list(dict.values())[node]) > 1:
@@ -64,6 +66,7 @@ def register(dict):
                 if element != ',':
                     cycle = int(element)
                     life_cycle[cycle - 1].append(list(dict.keys())[node])
+        
     return life_cycle
 
 def Number_of_register(life_cycle):
