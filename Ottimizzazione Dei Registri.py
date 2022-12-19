@@ -17,10 +17,26 @@ di utilizzare un euristico di tipo greedy. Si tratta semplicemente di definire u
 Si parte dal primo vertice e si procede assegnando a ciascun vertice un colore fra quelli diversi da quelli dei vertici adiacenti
 a quello considerato. Dopo aver fatto questa operazione, si chiede di scrivere la tabella con la descrizione RTL delle operazioni.
 '''
+
+def decision_file():
+    y_n = "n"
+    
+    while y_n != "y":
+        print("HAI A DISPOSIZIONE DIVERSI FILE DA CUI SCEGLIER, CHE VANNO DA DFG1.txt a DFG10.txt, DIGITA QUELLO CHE VORRESTI UTILIZZARE:")
+        DFG_chosen = input()
+        print("SEI SICURO DELLA TUA SCELTA? \nDigita y/n...")
+        y_n = input()
+    
+    return DFG_chosen
+
 #Creo funzione che apra un file
 def file_to_DFG(file):
     file = open(file, "r+")
     DFG = pd.read_csv(file, names = ['Val', 'Oper', 'CLK'], engine = 'python', delimiter=";")
+    print("------------------------------------------------")
+    print("         IL FILE SCELTO E' IL SEGUENTE          ")
+    print(DFG)
+    print("------------------------------------------------")
     return DFG
 
 def dict_for_lyfe_cycle(DFG):
@@ -116,32 +132,6 @@ def compatible(register, dict, operation):
         return False
 
 #Creazione dei registri
-def register_optimization(life_cycle, dict, num_register):
-    register_optimized = []
-    operation_used = []
-    for i in range(0, num_register):
-        register_optimized.append([])   
-    for clock in life_cycle:
-        for operation in clock:
-            for register in register_optimized:
-                if operation not in operation_used:
-                    if register == []:
-                        register.append(operation)
-                        operation_used.append(operation)
-                        break
-                    elif operation in register:
-                        break
-                    else:
-                        add = compatible(register, dict, operation)
-                        if add == True:
-                            register.append(operation)
-                            operation_used.append(operation)
-                        else: 
-                            continue    
-                else: 
-                    continue                    
-    return register_optimized
-
 def register_optimization(life_cycle, dict, num_register):
     register_optimized = []
     operation_used = []
@@ -277,14 +267,15 @@ def RTL_Description(registri, color, life_cycle, DFG):
     print(rtl_1, "\n", rtl_2)
 
 
-DFG = file_to_DFG("DFG5.txt") #Creo DFG dato un file di testo
+file = decision_file()
+DFG = file_to_DFG(file) #Creo DFG dato un file di testo
 dizionario = dict_for_lyfe_cycle(DFG) #Creo dizionario con le variabili e i rispettivi cicli di clock
 life_cycle = register(dizionario) #Creo lista con i cicli di clock e le variabili attive in quel ciclo
 register = Number_of_register(life_cycle) #Determino il numero di registri che si utilizzano
 for element in range(len(life_cycle)):
-    print("Ciclo di clock: ", element + 1, "Variabili attive: ", life_cycle[element])
+    print("Nel ciclo di clock: ", element + 1, "le variabili attive sono: ", life_cycle[element])
 
-print("Il numero di registri necessari per il Graph Coloring è: ", register)
+print("IL NUMERO DI REGISTRI NECESSARIO PER IL COLORING GRAPH E': ", register)
 
 graph, figure = Incompatibility_Graph(life_cycle) #Creo il grafo di incompatibilità
 figure.show()
@@ -294,6 +285,7 @@ incomp_dict = dict_incompatibility(life_cycle) #Creo dizionario con le variabili
 #max_operation = input(" ")
 registri = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo il numero di registri, se voglio decidere quante operazioni mettere nel registro, inserire la variabile di input
 
+print("------------------------------------------------")
 for i in range(0,len(registri)):
     print("Il", (i + 1), "registro contiene le seguenti operazioni --> ", registri[i])
 
