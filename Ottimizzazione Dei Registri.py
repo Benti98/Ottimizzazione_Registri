@@ -22,7 +22,7 @@ def decision_file():
     y_n = "n"
     
     while y_n != "y":
-        print("HAI A DISPOSIZIONE DIVERSI FILE DA CUI SCEGLIER, CHE VANNO DA DFG1.txt a DFG10.txt, DIGITA QUELLO CHE VORRESTI UTILIZZARE:")
+        print("HAI A DISPOSIZIONE DIVERSI FILE DA CUI SCEGLIER, CHE VANNO DA DFG1.txt a DFG9.txt, DIGITA QUELLO CHE VORRESTI UTILIZZARE \nAd esempio DFG5.txt...")
         DFG_chosen = input()
         print("SEI SICURO DELLA TUA SCELTA? \nDigita y/n...")
         y_n = input()
@@ -190,7 +190,6 @@ def register_optimization_2(life_cycle, dict, num_register, max_operation):
 
 def coloring_graph(graph, registri, life_cycle):
     color = list(np.random.choice(range(256), size = len(registri)))
-    #color = int(["#"+''.join([np.random.choice('0123456789ABCDEF') for j in range(6)])])
     dict_color = {}
 
     #Assegno ad ogni nodo il proprio colore 
@@ -290,7 +289,7 @@ registri = register_optimization(life_cycle, incomp_dict, register) #Ottimizzo i
 
 print("------------------------------------------------")
 for i in range(0,len(registri)):
-    print("Il", (i + 1), "registro contiene le seguenti operazioni --> ", registri[i])
+    print("Il registro ",i,"contiene le seguenti operazioni --> ", registri[i])
 
 
 final_graph, color = coloring_graph(figure, registri, life_cycle)
