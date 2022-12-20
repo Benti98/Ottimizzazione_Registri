@@ -266,7 +266,7 @@ def RTL_Description(registri, color, life_cycle, DFG):
     print("-------------------------------------")
     print("           RTL DESCRIPTION           ")
     print("-------------------------------------")
-    print(rtl_1, "\n", rtl_2)
+    print(rtl_2, "\n", rtl_1)
 
 
 file = decision_file()
