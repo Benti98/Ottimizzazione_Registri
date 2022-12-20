@@ -1,16 +1,5 @@
 # Ottimizzazione_Registri
 
-Dato un data-flow graph con scheduling, si chiede di implementare l’ottimizzazione
-dei registri tramite graph-coloring. In particolare, il programma riceve in ingresso 
-un file di testo con la descrizione dell’algoritmo in cui ciascuna operazione e annotata 
-con il ciclo di clock in cui viene eseguita e la risorsa funzionale che la esegue (binding).
-A questo punto per ogni variabile utilizzata (a sinistra degli assegnamenti), si calcola il tempo
-di vita e da questo grafo si ottiene il numero di colori (registri) da utilizzare per il graph coloring
-e il grafo di incompatibilita delle variabili. Per colorare quest’ultimo esistono delle tecniche esatte, ma qui si suggerisce
-di utilizzare un euristico di tipo greedy. Si tratta semplicemente di definire un ordinamento per i vertici e uno per i colori.
-Si parte dal primo vertice e si procede assegnando a ciascun vertice un colore fra quelli diversi da quelli dei vertici adiacenti
-a quello considerato. Dopo aver fatto questa operazione, si chiede di scrivere la tabella con la descrizione RTL delle operazioni.
-
 Progetto sull'ottimizzazione dei registri utilizzando graph coloring sul grafo di incompatibilità.
 Il programma riceve in ingresso un file .txt, contenente al suo interno: 
 1) Variabile;
